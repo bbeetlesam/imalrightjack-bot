@@ -30,6 +30,10 @@ func main() {
 			continue
 		}
 
+		if !update.Message.IsCommand() {
+			continue
+		}
+
 		log.Printf(
 			"Message from %s (%d): %s", update.Message.From.UserName, update.Message.Chat.ID, update.Message.Text,
 		)
@@ -37,9 +41,11 @@ func main() {
 		if update.Message.IsCommand() {
 			switch update.Message.Command() {
 			case "start":
-				sendMessage(bot, update.Message.Chat.ID, GREET)
+				sendMessage(bot, update.Message.Chat.ID, GREET_MSG)
 			case "help":
-				sendMessage(bot, update.Message.Chat.ID, HELP)
+				sendMessage(bot, update.Message.Chat.ID, HELP_MSG)
+			default:
+				sendMessage(bot, update.Message.Chat.ID, DEFAULT_MSG)
 			}
 		}
 	}
