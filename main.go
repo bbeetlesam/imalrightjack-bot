@@ -7,11 +7,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-const (
-	GREET string = "Hello, I'm Jack. May I help you with those green stacks?"
-	HELP  string = "Use /start to start, and /help to help.\nUse /spend or /earn to manage the stack."
-)
-
 func main() {
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELETOKEN")) // connect to the bot with its token
 	if err != nil {
@@ -26,7 +21,7 @@ func main() {
 	updates := bot.GetUpdatesChan(u)
 	bot.Debug = false
 
-	log.Printf("Waiting to get updates (from her)...")
+	log.Printf(START_LOG)
 
 	for update := range updates {
 		if update.Message == nil {
