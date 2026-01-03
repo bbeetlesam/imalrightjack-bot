@@ -44,6 +44,8 @@ func main() {
 				sendMessage(bot, update.Message.Chat.ID, GREET_MSG)
 			case "help":
 				sendMessage(bot, update.Message.Chat.ID, HELP_MSG)
+			case "about":
+				sendMessage(bot, update.Message.Chat.ID, ABOUT_MSG)
 			default:
 				sendMessage(bot, update.Message.Chat.ID, DEFAULT_MSG)
 			}
@@ -61,6 +63,7 @@ func setBotCommands(bot *tgbotapi.BotAPI) {
 	commands := []tgbotapi.BotCommand{
 		{Command: "start", Description: "Wake Jack up"},
 		{Command: "help", Description: "How this thing works"},
+		{Command: "about", Description: "About Jack, and who made him"},
 		{Command: "earn", Description: "Log an income"},
 		{Command: "spend", Description: "Log an expense"},
 		{Command: "today", Description: "Today’s damage report"},
