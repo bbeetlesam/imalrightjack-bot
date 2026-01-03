@@ -13,6 +13,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	setBotCommands(bot)
+
 	log.Printf("Authorised as: %s", bot.Self.UserName) // if succesfully connected
 
 	u := tgbotapi.NewUpdate(0) // creates an UpdateConfig obj
@@ -45,5 +47,22 @@ func main() {
 
 func sendMessage(bot *tgbotapi.BotAPI, chatID int64, msg string) {
 	message := tgbotapi.NewMessage(chatID, msg)
+	message.ParseMode = "Markdown"
 	bot.Send(message)
+}
+
+func setBotCommands(bot *tgbotapi.BotAPI) {
+	commands := []tgbotapi.BotCommand{
+		{Command: "start", Description: "Wake Jack up"},
+		{Command: "help", Description: "How this thing works"},
+		{Command: "earn", Description: "Log an income"},
+		{Command: "spend", Description: "Log an expense"},
+		{Command: "today", Description: "Today’s damage report"},
+	}
+
+	config := tgbotapi.NewSetMyCommands(commands...)
+	_, err := bot.Request(config)
+	if err != nil {
+		log.Println("Failed to set commands:", err)
+	}
 }
