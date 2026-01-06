@@ -16,7 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	initSchema(db)
+	initSchemaDB(db)
 
 	// connect to the bot with its token
 	bot, err := tgbotapi.NewBotAPI(TELEBOT_TOKEN)
