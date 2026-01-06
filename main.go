@@ -46,28 +46,27 @@ func main() {
 		)
 
 		if update.Message.IsCommand() {
+			responseMsg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+			responseMsg.ParseMode = "Markdown"
+
 			switch update.Message.Command() {
 			case "start":
-				sendMessage(bot, update.Message.Chat.ID, GREET_MSG)
+				responseMsg.Text = GREET_MSG
 			case "help":
-				sendMessage(bot, update.Message.Chat.ID, HELP_MSG)
+				responseMsg.Text = HELP_MSG
 			case "about":
-				sendMessage(bot, update.Message.Chat.ID, ABOUT_MSG)
+				responseMsg.Text = ABOUT_MSG
 			case "earn":
-				sendMessage(bot, update.Message.Chat.ID, "earn what?")
+				responseMsg.Text = "earn what"
 			case "spend":
-				sendMessage(bot, update.Message.Chat.ID, "spend what?")
+				responseMsg.Text = "spend what"
 			default:
-				sendMessage(bot, update.Message.Chat.ID, DEFAULT_MSG)
+				responseMsg.Text = DEFAULT_MSG
 			}
+
+			bot.Send(responseMsg)
 		}
 	}
-}
-
-func sendMessage(bot *tgbotapi.BotAPI, chatID int64, msg string) {
-	message := tgbotapi.NewMessage(chatID, msg)
-	message.ParseMode = "Markdown"
-	bot.Send(message)
 }
 
 func setBotCommands(bot *tgbotapi.BotAPI) {
