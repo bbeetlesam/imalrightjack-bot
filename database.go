@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
@@ -28,13 +29,13 @@ func openDatabase() (*sql.DB, error) {
 	return db, nil
 }
 
-func initSchema(db *sql.DB) error {
+func initSchemaDB(db *sql.DB) error {
 	query := `CREATE TABLE IF NOT EXISTS transactions ( 
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id INTEGER NOT NULL,
 		type TEXT NOT NULL CHECK(type IN ('spend', 'earn')),
 		timestamp INTEGER NOT NULL,
-		amount REAL NOT NULL,
+		amount INTEGER NOT NULL,
 		note TEXT
 	);`
 
@@ -43,4 +44,14 @@ func initSchema(db *sql.DB) error {
 	}
 
 	return nil
+}
+
+func addTransactionToDB(db *sql.DB, userID int64, tx *TransactionInput) error {
+	query := `INSERT INTO transactions (user_id, type, timestamp, amount, note)
+		VALUES (?, ?, ?, ?, ?)
+	;`
+
+	timestamp := time.Now().Unix()
+	_, err := db.Exec(query, userID, tx.Type, timestamp, tx.Amount, tx.Note)
+	return err
 }
