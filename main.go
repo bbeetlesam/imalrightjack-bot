@@ -7,8 +7,18 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+var TELEBOT_TOKEN string = os.Getenv("TELETOKEN")
+
 func main() {
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELETOKEN")) // connect to the bot with its token
+	// open/connect to the database (remote)
+	db, err := openDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// connect to the bot with its token
+	bot, err := tgbotapi.NewBotAPI(TELEBOT_TOKEN)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,10 +40,6 @@ func main() {
 			continue
 		}
 
-		if !update.Message.IsCommand() {
-			continue
-		}
-
 		log.Printf(
 			"Message from %s (%d): %s", update.Message.From.UserName, update.Message.Chat.ID, update.Message.Text,
 		)
@@ -46,6 +52,10 @@ func main() {
 				sendMessage(bot, update.Message.Chat.ID, HELP_MSG)
 			case "about":
 				sendMessage(bot, update.Message.Chat.ID, ABOUT_MSG)
+			case "earn":
+				sendMessage(bot, update.Message.Chat.ID, "earn what?")
+			case "spend":
+				sendMessage(bot, update.Message.Chat.ID, "spend what?")
 			default:
 				sendMessage(bot, update.Message.Chat.ID, DEFAULT_MSG)
 			}
