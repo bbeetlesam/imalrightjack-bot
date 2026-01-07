@@ -35,7 +35,7 @@ func main() {
 	updates := bot.GetUpdatesChan(u)
 	bot.Debug = false
 
-	log.Printf(START_LOG)
+	log.Printf(startLog)
 
 	for update := range updates {
 		if update.Message == nil {
@@ -43,22 +43,23 @@ func main() {
 		}
 
 		userID := update.Message.From.ID
+		chatID := update.Message.Chat.ID
 
 		log.Printf(
 			"Message from %s (%d): %s", update.Message.From.UserName, userID, update.Message.Text,
 		)
 
 		if update.Message.IsCommand() {
-			responseMsg := tgbotapi.NewMessage(userID, "")
+			responseMsg := tgbotapi.NewMessage(chatID, "")
 			responseMsg.ParseMode = "Markdown"
 
 			switch update.Message.Command() {
 			case "start":
-				responseMsg.Text = GREET_MSG
+				responseMsg.Text = greetMsg
 			case "help":
-				responseMsg.Text = HELP_MSG
+				responseMsg.Text = helpMsg
 			case "about":
-				responseMsg.Text = ABOUT_MSG
+				responseMsg.Text = aboutMsg
 			case "earn", "spend":
 				tx, err := parseTransactionMsg(update.Message.Text)
 				if err != nil {
@@ -86,7 +87,7 @@ func main() {
 					log.Printf("Transaction saved: %s Rp. %d by user %d", tx.Type, tx.Amount, userID)
 				}
 			default:
-				responseMsg.Text = DEFAULT_MSG
+				responseMsg.Text = defaultMsg
 			}
 
 			bot.Send(responseMsg)
