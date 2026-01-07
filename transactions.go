@@ -18,7 +18,7 @@ func parseTransactionMsg(msgText string) (*TransactionInput, error) {
 	note := ""
 
 	if len(args) < 2 {
-		return nil, fmt.Errorf(TRSC_ERRMSG_ARG)
+		return nil, fmt.Errorf(trscErrMsgArg)
 	}
 
 	// parse command type [spend | earn]
@@ -27,7 +27,7 @@ func parseTransactionMsg(msgText string) (*TransactionInput, error) {
 	// parse amount (int, not float)
 	amount, err := strconv.ParseInt(args[1], 10, 64)
 	if err != nil || amount <= 0 {
-		return nil, fmt.Errorf(TRSC_ERRMSG_NUM)
+		return nil, fmt.Errorf(trscErrMsgNum)
 	}
 
 	// parse note (truncated if length > 75)
