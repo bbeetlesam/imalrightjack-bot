@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -41,12 +42,14 @@ func main() {
 			continue
 		}
 
+		userID := update.Message.From.ID
+
 		log.Printf(
-			"Message from %s (%d): %s", update.Message.From.UserName, update.Message.Chat.ID, update.Message.Text,
+			"Message from %s (%d): %s", update.Message.From.UserName, userID, update.Message.Text,
 		)
 
 		if update.Message.IsCommand() {
-			responseMsg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+			responseMsg := tgbotapi.NewMessage(userID, "")
 			responseMsg.ParseMode = "Markdown"
 
 			switch update.Message.Command() {
@@ -56,10 +59,32 @@ func main() {
 				responseMsg.Text = HELP_MSG
 			case "about":
 				responseMsg.Text = ABOUT_MSG
-			case "earn":
-				responseMsg.Text = "earn what"
-			case "spend":
-				responseMsg.Text = "spend what"
+			case "earn", "spend":
+				tx, err := parseTransactionMsg(update.Message.Text)
+				if err != nil {
+					responseMsg.Text = "ERROR: " + err.Error()
+					break
+				}
+
+				if err := addTransactionToDB(db, userID, tx); err != nil {
+					responseMsg.Text = "ERROR: " + "Failed to save the transaction.\nPlease try again."
+					log.Printf("Database error: %v", err)
+				} else {
+					note := "-"
+					action := "earned"
+
+					if tx.Note != "" {
+						note = "\n" + tx.Note
+					}
+					if tx.Type == "spend" {
+						action = "spent"
+					}
+
+					responseMsg.Text = fmt.Sprintf(
+						"Jack noted that you _%s_ *Rp. %d* with note: %s", action, tx.Amount, note,
+					)
+					log.Printf("Transaction saved: %s Rp. %d by user %d", tx.Type, tx.Amount, userID)
+				}
 			default:
 				responseMsg.Text = DEFAULT_MSG
 			}
