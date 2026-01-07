@@ -11,7 +11,7 @@ import (
 
 var (
 	TURSO_TOKEN string = os.Getenv("TURSOTOKEN")
-	TURSO_URL string = os.Getenv("TURSOURL")
+	TURSO_URL   string = os.Getenv("TURSOURL")
 )
 
 func openDatabase() (*sql.DB, error) {
