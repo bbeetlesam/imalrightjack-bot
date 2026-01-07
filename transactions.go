@@ -7,9 +7,9 @@ import (
 )
 
 type TransactionInput struct {
-	Type string
+	Type   string
 	Amount int64
-	Note string
+	Note   string
 }
 
 func parseTransactionMsg(msgText string) (*TransactionInput, error) {
@@ -18,7 +18,7 @@ func parseTransactionMsg(msgText string) (*TransactionInput, error) {
 	note := ""
 
 	if len(args) < 2 {
-		return nil, fmt.Errorf("bad usage.")
+		return nil, fmt.Errorf(TRSC_ERRMSG_ARG)
 	}
 
 	// parse command type [spend | earn]
@@ -27,7 +27,7 @@ func parseTransactionMsg(msgText string) (*TransactionInput, error) {
 	// parse amount (int, not float)
 	amount, err := strconv.ParseInt(args[1], 10, 64)
 	if err != nil || amount <= 0 {
-		return nil, fmt.Errorf("invalid amount (numbers only)")
+		return nil, fmt.Errorf(TRSC_ERRMSG_NUM)
 	}
 
 	// parse note (truncated if length > 75)
@@ -38,5 +38,5 @@ func parseTransactionMsg(msgText string) (*TransactionInput, error) {
 		}
 	}
 
-	return &TransactionInput{ Type: cmdType, Amount: amount, Note: note }, nil
+	return &TransactionInput{Type: cmdType, Amount: amount, Note: note}, nil
 }
