@@ -6,6 +6,7 @@ import (
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	messages "github.com/bbeetlesam/imalrightjack-bot/messages"
 )
 
 var TELEBOT_TOKEN string = os.Getenv("TELETOKEN")
@@ -35,7 +36,7 @@ func main() {
 	updates := bot.GetUpdatesChan(u)
 	bot.Debug = false
 
-	log.Printf(startLog)
+	log.Printf(messages.LogStart)
 
 	for update := range updates {
 		if update.Message == nil {
@@ -55,11 +56,11 @@ func main() {
 
 			switch update.Message.Command() {
 			case "start":
-				responseMsg.Text = greetMsg
+				responseMsg.Text = messages.RespGreet
 			case "help":
-				responseMsg.Text = helpMsg
+				responseMsg.Text = messages.RespHelp
 			case "about":
-				responseMsg.Text = aboutMsg
+				responseMsg.Text = messages.RespAbout
 			case "earn", "spend":
 				tx, err := parseTransactionMsg(update.Message.Text)
 				if err != nil {
@@ -87,7 +88,7 @@ func main() {
 					log.Printf("Transaction saved: %s Rp. %d by user %d", tx.Type, tx.Amount, userID)
 				}
 			default:
-				responseMsg.Text = defaultMsg
+				responseMsg.Text = messages.RespDefault
 			}
 
 			bot.Send(responseMsg)
