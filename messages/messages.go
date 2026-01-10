@@ -23,9 +23,12 @@ const (
 const (
 	LogStart            string = "Waiting to get updates (from her)..."
 	LogDBConnected      string = "Successfully connected to the database. A present from Nancy!"
-	LogTeletokenMissing string = "$TELETOKEN env variable not set."
-	LogDBTokenMissing   string = "$TURSOTOKEN env variable not set."
-	LogDBUrlMissing     string = "$TURSOURL env variable not set."
+)
+
+const (
+	ErrTeletokenMissing string = "$TELETOKEN env variable not set."
+	ErrDBTokenMissing   string = "$TURSOTOKEN env variable not set."
+	ErrDBUrlMissing     string = "$TURSOURL env variable not set."
 )
 
 func RespTransactionSuccess(act string, amount int64, note string) string {
