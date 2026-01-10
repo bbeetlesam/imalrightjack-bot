@@ -1,33 +1,46 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/bbeetlesam/imalrightjack-bot/messages"
 )
 
-type TransactionInput struct {
+type Transaction struct {
 	Type   string
 	Amount int64
 	Note   string
 }
 
-func parseTransactionMsg(msgText string) (*TransactionInput, error) {
+func addTransactionToDB(db *sql.DB, userID int64, tx *Transaction) error {
+	query := `INSERT INTO transactions (user_id, type, timestamp, amount, note)
+		VALUES (?, ?, ?, ?, ?)
+	;`
+
+	timestamp := time.Now().Unix()
+	_, err := db.Exec(query, userID, tx.Type, timestamp, tx.Amount, tx.Note)
+	return err
+}
+
+func parseTransactionMsg(msgText string) (*Transaction, string) {
 	args := strings.SplitN(msgText, " ", 3)
 	maxNoteLength := 75
 	note := ""
 
 	if len(args) < 2 {
-		return nil, fmt.Errorf(trscErrMsgArg)
+		return nil, messages.RespErrAmount
 	}
 
 	// parse command type [spend | earn]
 	cmdType := strings.TrimPrefix(args[0], "/")
 
-	// parse amount (int, not float)
+	// parse amount (positive int, not float)
 	amount, err := strconv.ParseInt(args[1], 10, 64)
 	if err != nil || amount <= 0 {
-		return nil, fmt.Errorf(trscErrMsgNum)
+		return nil, messages.RespErrInvalidAmount
 	}
 
 	// parse note (truncated if length > 75)
@@ -38,5 +51,5 @@ func parseTransactionMsg(msgText string) (*TransactionInput, error) {
 		}
 	}
 
-	return &TransactionInput{Type: cmdType, Amount: amount, Note: note}, nil
+	return &Transaction{Type: cmdType, Amount: amount, Note: note}, ""
 }

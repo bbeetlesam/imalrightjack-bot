@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"log"
 	"os"
-	"time"
 
+	"github.com/bbeetlesam/imalrightjack-bot/messages"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
@@ -24,7 +24,7 @@ func openDatabase() (*sql.DB, error) {
 	if err := db.Ping(); err != nil {
 		return nil, err
 	}
-	log.Println("Successfully connected to the database. A present from Nancy!") // supersister
+	log.Println(messages.LogDBConnected) // supersister
 
 	return db, nil
 }
@@ -39,19 +39,6 @@ func initSchemaDB(db *sql.DB) error {
 		note TEXT
 	);`
 
-	if _, err := db.Exec(query); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func addTransactionToDB(db *sql.DB, userID int64, tx *TransactionInput) error {
-	query := `INSERT INTO transactions (user_id, type, timestamp, amount, note)
-		VALUES (?, ?, ?, ?, ?)
-	;`
-
-	timestamp := time.Now().Unix()
-	_, err := db.Exec(query, userID, tx.Type, timestamp, tx.Amount, tx.Note)
+	_, err := db.Exec(query)	
 	return err
 }
