@@ -30,7 +30,7 @@ func InitSchema(db *sql.DB) error {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id INTEGER NOT NULL,
 		type TEXT NOT NULL CHECK(type IN ('spend', 'earn')),
-		timestamp INTEGER NOT NULL,
+		timestamp TEXT NOT NULL,
 		amount INTEGER NOT NULL,
 		note TEXT
 	);`

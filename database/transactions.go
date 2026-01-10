@@ -20,7 +20,7 @@ func AddTransaction(db *sql.DB, userID int64, tx *Transaction) error {
 		VALUES (?, ?, ?, ?, ?)
 	;`
 
-	timestamp := time.Now().Unix()
+	timestamp := time.Now().Format(time.RFC3339)
 	_, err := db.Exec(query, userID, tx.Type, timestamp, tx.Amount, tx.Note)
 	return err
 }
