@@ -17,7 +17,7 @@ const (
 		"so I think you can trust him."
 	RespTransactionFailed string = "ERROR: Failed to save the transaction.\nPlease try again."
 	RespErrAmount         string = "Please specify the amount, and optionally the notes."
-	RespErrInvAmount      string = "Invalid amount! Use positive numbers only (e.g. 67000)\nNo commas, dots, and letters allowed."
+	RespErrInvalidAmount      string = "Invalid amount! Use positive numbers only (e.g. 67000)\nNo commas, dots, and letters allowed."
 )
 
 const (
@@ -46,7 +46,7 @@ func LogMessageReceived(username string, userID int64, text string) string {
 	return fmt.Sprintf("Message from %s (%d): %s", username, userID, text)
 }
 
-func LogTransactionSuccess(act string, amount int64, userID int64) string {
+func LogTransactionSaved(act string, amount int64, userID int64) string {
 	return fmt.Sprintf("Transaction saved: %s Rp. %d by user %d", act, amount, userID)
 }
 
