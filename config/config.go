@@ -1,4 +1,5 @@
-package main
+// Package config handles loading and validating bot configuration from environment variables.
+package config
 
 import (
 	"errors"
@@ -13,7 +14,7 @@ type BotConfig struct {
 	DatabaseURL   string
 }
 
-func loadBotConfig() (*BotConfig, error) {
+func LoadBotConfig() (*BotConfig, error) {
 	teleToken := os.Getenv("TELETOKEN")
 	if teleToken == "" {
 		return nil, errors.New(messages.ErrTeletokenMissing)
