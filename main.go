@@ -2,17 +2,19 @@ package main
 
 import (
 	"log"
-	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
 )
 
-var TELEBOT_TOKEN string = os.Getenv("TELETOKEN")
-
 func main() {
+	botCfg, err := loadBotConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// open/connect to the database (remote)
-	db, err := openDatabase()
+	db, err := openDatabase(botCfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,7 +25,7 @@ func main() {
 	}
 
 	// connect to the bot with its token
-	bot, err := tgbotapi.NewBotAPI(TELEBOT_TOKEN)
+	bot, err := tgbotapi.NewBotAPI(botCfg.TelebotToken)
 	if err != nil {
 		log.Fatal(err)
 	}

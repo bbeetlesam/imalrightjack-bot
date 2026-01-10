@@ -3,19 +3,13 @@ package main
 import (
 	"database/sql"
 	"log"
-	"os"
 
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
-var (
-	TURSO_TOKEN string = os.Getenv("TURSOTOKEN")
-	TURSO_URL   string = os.Getenv("TURSOURL")
-)
-
-func openDatabase() (*sql.DB, error) {
-	connectionString := TURSO_URL + "?authToken=" + TURSO_TOKEN
+func openDatabase(botCfg *BotConfig) (*sql.DB, error) {
+	connectionString := botCfg.DatabaseURL + "?authToken=" + botCfg.DatabaseToken
 	db, err := sql.Open("libsql", connectionString)
 	if err != nil {
 		return nil, err
