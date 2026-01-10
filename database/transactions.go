@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"database/sql"
@@ -15,7 +15,7 @@ type Transaction struct {
 	Note   string
 }
 
-func addTransactionToDB(db *sql.DB, userID int64, tx *Transaction) error {
+func AddTransaction(db *sql.DB, userID int64, tx *Transaction) error {
 	query := `INSERT INTO transactions (user_id, type, timestamp, amount, note)
 		VALUES (?, ?, ?, ?, ?)
 	;`
@@ -25,7 +25,7 @@ func addTransactionToDB(db *sql.DB, userID int64, tx *Transaction) error {
 	return err
 }
 
-func parseTransactionMsg(msgText string) (*Transaction, string) {
+func ParseTransactionMsg(msgText string) (*Transaction, string) {
 	args := strings.SplitN(msgText, " ", 3)
 	maxNoteLength := 75
 	note := ""

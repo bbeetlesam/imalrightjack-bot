@@ -1,14 +1,16 @@
-package main
+// Package database provides database connection management and transaction operations.
+package database
 
 import (
 	"database/sql"
 	"log"
 
+	"github.com/bbeetlesam/imalrightjack-bot/config"
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
-func openDatabase(botCfg *BotConfig) (*sql.DB, error) {
+func Open(botCfg *config.BotConfig) (*sql.DB, error) {
 	connectionString := botCfg.DatabaseURL + "?authToken=" + botCfg.DatabaseToken
 	db, err := sql.Open("libsql", connectionString)
 	if err != nil {
@@ -23,7 +25,7 @@ func openDatabase(botCfg *BotConfig) (*sql.DB, error) {
 	return db, nil
 }
 
-func initSchemaDB(db *sql.DB) error {
+func InitSchema(db *sql.DB) error {
 	query := `CREATE TABLE IF NOT EXISTS transactions ( 
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id INTEGER NOT NULL,
@@ -33,6 +35,6 @@ func initSchemaDB(db *sql.DB) error {
 		note TEXT
 	);`
 
-	_, err := db.Exec(query)	
+	_, err := db.Exec(query)
 	return err
 }
