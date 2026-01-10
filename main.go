@@ -3,24 +3,26 @@ package main
 import (
 	"log"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/bbeetlesam/imalrightjack-bot/config"
+	"github.com/bbeetlesam/imalrightjack-bot/database"
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func main() {
-	botCfg, err := loadBotConfig()
+	botCfg, err := config.LoadBotConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// open/connect to the database (remote)
-	db, err := openDatabase(botCfg)
+	db, err := database.Open(botCfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	if err := initSchemaDB(db); err != nil {
+	if err := database.InitSchema(db); err != nil {
 		log.Fatal(err)
 	}
 
@@ -64,13 +66,13 @@ func main() {
 			case "about":
 				responseMsg.Text = messages.RespAbout
 			case "earn", "spend":
-				tx, userErrMsg := parseTransactionMsg(update.Message.Text)
+				tx, userErrMsg := database.ParseTransactionMsg(update.Message.Text)
 				if userErrMsg != "" {
 					responseMsg.Text = userErrMsg
 					break
 				}
 
-				if err := addTransactionToDB(db, userID, tx); err != nil {
+				if err := database.AddTransaction(db, userID, tx); err != nil {
 					responseMsg.Text = messages.RespTransactionFailed
 					log.Println(messages.LogDBError(err))
 				} else {
@@ -98,8 +100,8 @@ func setBotCommands(bot *tgbotapi.BotAPI) {
 		{Command: "today", Description: "Today’s damage report"},
 	}
 
-	config := tgbotapi.NewSetMyCommands(commands...)
-	_, err := bot.Request(config)
+	cmdConfig := tgbotapi.NewSetMyCommands(commands...)
+	_, err := bot.Request(cmdConfig)
 	if err != nil {
 		log.Printf("Failed to set commands: %v", err)
 	}
