@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/bbeetlesam/imalrightjack-bot/config"
 	"github.com/bbeetlesam/imalrightjack-bot/database"
@@ -78,6 +79,22 @@ func main() {
 				} else {
 					responseMsg.Text = messages.RespTransactionSuccess(tx.Type, tx.Amount, tx.Note)
 					log.Println(messages.LogTransactionSaved(tx.Type, tx.Amount, userID))
+				}
+			case "today":
+				transactions, totalAmount, err := database.GetTodayTransactions(db, userID)
+				if err != nil {
+					log.Println("cant read. placeholder")
+					break
+				}
+
+				if len(transactions) == 0 {
+					responseMsg.Text = "You have no transactions today, at least according to Jack's records."
+				} else {
+					responseMsg.Text = "Your transactions today, recorded:\n\n"
+					for i, transaction := range transactions {
+						responseMsg.Text += strconv.Itoa(i+1) + ". " + transaction.Type + " " + strconv.FormatInt(transaction.Amount, 10) + "\n"
+					}
+					responseMsg.Text += "\nTotal: Rp. " + strconv.FormatInt(totalAmount, 10)
 				}
 			default:
 				responseMsg.Text = messages.RespDefault
