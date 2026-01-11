@@ -6,15 +6,10 @@ import (
 	"os"
 
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
+	"github.com/bbeetlesam/imalrightjack-bot/models"
 )
 
-type BotConfig struct {
-	TelebotToken  string
-	DatabaseToken string
-	DatabaseURL   string
-}
-
-func LoadBotConfig() (*BotConfig, error) {
+func LoadBotConfig() (*models.BotConfig, error) {
 	teleToken := os.Getenv("TELETOKEN")
 	if teleToken == "" {
 		return nil, errors.New(messages.ErrTeletokenMissing)
@@ -30,7 +25,7 @@ func LoadBotConfig() (*BotConfig, error) {
 		return nil, errors.New(messages.ErrDBUrlMissing)
 	}
 
-	return &BotConfig{
+	return &models.BotConfig{
 		TelebotToken:  teleToken,
 		DatabaseToken: tursoToken,
 		DatabaseURL:   tursoURL,

@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/bbeetlesam/imalrightjack-bot/config"
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
+	"github.com/bbeetlesam/imalrightjack-bot/models"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
-func Open(botCfg *config.BotConfig) (*sql.DB, error) {
+func Open(botCfg *models.BotConfig) (*sql.DB, error) {
 	connectionString := botCfg.DatabaseURL + "?authToken=" + botCfg.DatabaseToken
 	db, err := sql.Open("libsql", connectionString)
 	if err != nil {

@@ -7,15 +7,10 @@ import (
 	"time"
 
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
+	"github.com/bbeetlesam/imalrightjack-bot/models"
 )
 
-type Transaction struct {
-	Type   string
-	Amount int64
-	Note   string
-}
-
-func AddTransaction(db *sql.DB, userID int64, tx *Transaction) error {
+func AddTransaction(db *sql.DB, userID int64, tx *models.Transaction) error {
 	query := `INSERT INTO transactions (user_id, type, timestamp, amount, note)
 		VALUES (?, ?, ?, ?, ?)
 	;`
@@ -25,7 +20,7 @@ func AddTransaction(db *sql.DB, userID int64, tx *Transaction) error {
 	return err
 }
 
-func ParseTransactionMsg(msgText string) (*Transaction, string) {
+func ParseTransactionMsg(msgText string) (*models.Transaction, string) {
 	args := strings.SplitN(msgText, " ", 3)
 	maxNoteLength := 75
 	note := ""
@@ -51,10 +46,10 @@ func ParseTransactionMsg(msgText string) (*Transaction, string) {
 		}
 	}
 
-	return &Transaction{Type: cmdType, Amount: amount, Note: note}, ""
+	return &models.Transaction{Type: cmdType, Amount: amount, Note: note}, ""
 }
 
-func GetTodayTransactions(db *sql.DB, userID int64) ([]Transaction, int64, error) {
+func GetTodayTransactions(db *sql.DB, userID int64) ([]models.Transaction, int64, error) {
 	today := time.Now().Format("2006-01-02")
 	query := `SELECT type, timestamp, amount, note
 		FROM transactions
@@ -69,11 +64,11 @@ func GetTodayTransactions(db *sql.DB, userID int64) ([]Transaction, int64, error
 	defer rows.Close()
 
 	var (
-		transactions []Transaction
+		transactions []models.Transaction
 		totalAmount  int64
 	)
 	for rows.Next() {
-		var transaction Transaction
+		var transaction models.Transaction
 		var timestamp string
 
 		if err := rows.Scan(&transaction.Type, &timestamp, &transaction.Amount, &transaction.Note); err != nil {
