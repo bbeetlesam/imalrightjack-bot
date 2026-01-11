@@ -53,3 +53,42 @@ func ParseTransactionMsg(msgText string) (*Transaction, string) {
 
 	return &Transaction{Type: cmdType, Amount: amount, Note: note}, ""
 }
+
+func GetTodayTransactions(db *sql.DB, userID int64) ([]Transaction, int64, error) {
+	today := time.Now().Format("2006-01-02")
+	query := `SELECT type, timestamp, amount, note
+		FROM transactions
+		WHERE user_id = ? AND timestamp LIKE ?
+		ORDER BY timestamp DESC
+	;`
+
+	rows, err := db.Query(query, userID, today+"%")
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var (
+		transactions []Transaction
+		totalAmount  int64
+	)
+	for rows.Next() {
+		var transaction Transaction
+		var timestamp string
+
+		if err := rows.Scan(&transaction.Type, &timestamp, &transaction.Amount, &transaction.Note); err != nil {
+			return nil, 0, err
+		}
+
+		switch transaction.Type {
+		case "spend":
+			totalAmount -= transaction.Amount
+		case "earn":
+			totalAmount += transaction.Amount
+		}
+
+		transactions = append(transactions, transaction)
+	}
+
+	return transactions, totalAmount, nil
+}
