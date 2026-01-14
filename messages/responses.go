@@ -41,15 +41,21 @@ func RespTransactionSuccess(act string, amount int64, note string) string {
 
 func RespTodayTransactions(transactions []models.Transaction, totalAmount int64) string {
 	message := ""
+	typeUppercase := func(str string) string {
+		if str == "spend" {
+			return "- Spent"
+		}
+		return "+ Earned"
+	}
 
 	if len(transactions) == 0 {
 		message = "You have no transactions today, at least according to Jack's records."
 	} else {
 		message = "Your transactions today, recorded:\n\n"
-		for i, transaction := range transactions {
-			message += strconv.Itoa(i+1) + ". " + transaction.Type + " " + strconv.FormatInt(transaction.Amount, 10) + "\n"
+		for _, transaction := range transactions {
+			message += typeUppercase(transaction.Type) + " Rp " + strconv.FormatInt(transaction.Amount, 10) + "\n"
 		}
-		message += "\nTotal: Rp. " + strconv.FormatInt(totalAmount, 10)
+		message += "\nTotal: Rp " + strconv.FormatInt(totalAmount, 10)
 	}
 
 	return message
