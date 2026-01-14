@@ -1,7 +1,11 @@
-// Package messages contains all bot message text, including Response, Log, and Error string messages.
 package messages
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/bbeetlesam/imalrightjack-bot/models"
+)
 
 const (
 	RespGreet   string = "Jack's here, mate. May I help you with those green stacks?"
@@ -18,18 +22,7 @@ const (
 		"so I think you can trust him."
 	RespTransactionFailed string = "ERROR: Failed to save the transaction.\nPlease try again."
 	RespErrAmount         string = "Please specify the amount, and optionally the notes."
-	RespErrInvalidAmount      string = "Invalid amount! Use positive numbers only (e.g. 67000)\nNo commas, dots, and letters allowed."
-)
-
-const (
-	LogStart            string = "Waiting to get updates (from her)..."
-	LogDBConnected      string = "Successfully connected to the database. A present from Nancy!"
-)
-
-const (
-	ErrTeletokenMissing string = "$TELETOKEN env variable not set."
-	ErrDBTokenMissing   string = "$TURSOTOKEN env variable not set."
-	ErrDBUrlMissing     string = "$TURSOURL env variable not set."
+	RespErrInvalidAmount  string = "Invalid amount! Use positive numbers only (e.g. 67000)\nNo commas, dots, and letters allowed."
 )
 
 func RespTransactionSuccess(act string, amount int64, note string) string {
@@ -46,18 +39,18 @@ func RespTransactionSuccess(act string, amount int64, note string) string {
 	return fmt.Sprintf("Jack noted that you _%s_ *Rp. %d* with note: %s", action, amount, noteText)
 }
 
-func LogMessageReceived(username string, userID int64, text string) string {
-	return fmt.Sprintf("Message from %s (%d): %s", username, userID, text)
-}
+func RespTodayTransactions(transactions []models.Transaction, totalAmount int64) string {
+	message := ""
 
-func LogTransactionSaved(act string, amount int64, userID int64) string {
-	return fmt.Sprintf("Transaction saved: %s Rp. %d by user %d", act, amount, userID)
-}
+	if len(transactions) == 0 {
+		message = "You have no transactions today, at least according to Jack's records."
+	} else {
+		message = "Your transactions today, recorded:\n\n"
+		for i, transaction := range transactions {
+			message += strconv.Itoa(i+1) + ". " + transaction.Type + " " + strconv.FormatInt(transaction.Amount, 10) + "\n"
+		}
+		message += "\nTotal: Rp. " + strconv.FormatInt(totalAmount, 10)
+	}
 
-func LogBotAuthorised(botName string) string {
-	return fmt.Sprintf("Bot authorised as: %s.", botName)
-}
-
-func LogDBError(err error) string {
-	return fmt.Sprintf("Database error: %v", err)
+	return message
 }
