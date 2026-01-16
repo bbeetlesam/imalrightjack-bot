@@ -52,7 +52,7 @@ func ParseTransactionMsg(msgText string) (*models.Transaction, string) {
 func GetTodayTransactions(db *sql.DB, userID int64) ([]models.Transaction, int64, error) {
 	now := time.Now() // use system timezone
 
-	// calculate start and end of today (00:00:00) - (24:00:00) in Jakarta
+	// calculate start and end of today (00:00:00) - (24:00:00) in the used timezone
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
 
