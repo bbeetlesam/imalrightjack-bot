@@ -15,7 +15,7 @@ func AddTransaction(db *sql.DB, userID int64, tx *models.Transaction) error {
 		VALUES (?, ?, ?, ?, ?)
 	;`
 
-	timestamp := time.Now().Format(time.RFC3339)
+	timestamp := time.Now().UTC().Format(time.RFC3339)
 	_, err := db.Exec(query, userID, tx.Type, timestamp, tx.Amount, tx.Note)
 	return err
 }
@@ -50,14 +50,28 @@ func ParseTransactionMsg(msgText string) (*models.Transaction, string) {
 }
 
 func GetTodayTransactions(db *sql.DB, userID int64) ([]models.Transaction, int64, error) {
-	today := time.Now().Format("2006-01-02")
+	jakartaLoc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		jakartaLoc = time.FixedZone("WIB", 7*60*60)
+	}
+
+	now := time.Now().In(jakartaLoc)
+
+	// calculate start and end of today (00:00:00) - (24:00:00) in Jakarta
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, jakartaLoc)
+	endOfDay := startOfDay.Add(24 * time.Hour)
+
+	// convert to UTC for database query
+	startUTC := startOfDay.UTC().Format(time.RFC3339)
+	endUTC := endOfDay.UTC().Format(time.RFC3339)
+
 	query := `SELECT type, timestamp, amount, note
 		FROM transactions
-		WHERE user_id = ? AND timestamp LIKE ?
+		WHERE user_id = ? AND timestamp >= ? AND timestamp < ?
 		ORDER BY timestamp DESC
 	;`
 
-	rows, err := db.Query(query, userID, today+"%")
+	rows, err := db.Query(query, userID, startUTC, endUTC)
 	if err != nil {
 		return nil, 0, err
 	}
