@@ -39,8 +39,8 @@ func main() {
 	u := tgbotapi.NewUpdate(0) // creates an UpdateConfig obj
 	u.Timeout = 60
 
-	updates := bot.GetUpdatesChan(u)
 	bot.Debug = false
+	updates := bot.GetUpdatesChan(u)
 
 	log.Println(messages.LogStart)
 
