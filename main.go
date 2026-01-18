@@ -88,6 +88,9 @@ func main() {
 							break
 						}
 
+						// prevents accidental double writing to the db (edge case)
+						if shouldShutdown(done) { return }
+
 						if err := database.AddTransaction(db, userID, tx); err != nil {
 							responseMsg.Text = messages.RespTransactionFailed
 							log.Println(messages.LogDBError(err))
@@ -96,6 +99,8 @@ func main() {
 							log.Println(messages.LogTransactionSaved(tx.Type, tx.Amount, userID))
 						}
 					case "today":
+						if shouldShutdown(done) { return }
+
 						transactions, totalAmount, err := database.GetTodayTransactions(db, userID)
 						if err != nil {
 							log.Println("cant read. placeholder")
@@ -116,13 +121,13 @@ func main() {
 	})
 
 	sig := <-sigChan
-	log.Printf("receive signal: %v", sig)
+	log.Println(messages.LogSignalOSReceived(sig))
 
 	close(done)
 	bot.StopReceivingUpdates()
 
 	wg.Wait()
-	log.Println("Shutdown complete. Fare thee well!")
+	log.Println(messages.LogExitProgram)
 }
 
 func setBotCommands(bot *tgbotapi.BotAPI) {
@@ -139,5 +144,14 @@ func setBotCommands(bot *tgbotapi.BotAPI) {
 	_, err := bot.Request(cmdConfig)
 	if err != nil {
 		log.Printf("Failed to set commands: %v", err)
+	}
+}
+
+func shouldShutdown(done chan struct{}) bool {
+	select {
+	case <-done:
+		return true
+	default:
+		return false
 	}
 }

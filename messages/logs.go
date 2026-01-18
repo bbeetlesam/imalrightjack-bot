@@ -1,10 +1,14 @@
 package messages
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 const (
 	LogStart       string = "Waiting to get updates (from her)..."
 	LogDBConnected string = "Successfully connected to the database. A present from Nancy!"
+	LogExitProgram string = "Shutdown complete. Fare thee well!"
 )
 
 func LogMessageReceived(username string, userID int64, text string) string {
@@ -21,4 +25,8 @@ func LogBotAuthorised(botName string) string {
 
 func LogDBError(err error) string {
 	return fmt.Sprintf("Database error: %v", err)
+}
+
+func LogSignalOSReceived(sig os.Signal) string {
+	return fmt.Sprintf("Received OS signal: %v", sig)
 }
