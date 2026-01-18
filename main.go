@@ -55,10 +55,7 @@ func main() {
 
 	log.Println(messages.LogStart)
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
+	wg.Go(func() {
 		for {
 			select {
 			case <-done:
@@ -116,7 +113,7 @@ func main() {
 				}
 			}
 		}
-	}()
+	})
 
 	sig := <-sigChan
 	log.Printf("receive signal: %v", sig)
