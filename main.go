@@ -2,6 +2,10 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 
 	"github.com/bbeetlesam/imalrightjack-bot/config"
 	"github.com/bbeetlesam/imalrightjack-bot/database"
@@ -42,60 +46,86 @@ func main() {
 	bot.Debug = false
 	updates := bot.GetUpdatesChan(u)
 
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	done := make(chan struct{})
+
+	var wg sync.WaitGroup
+
 	log.Println(messages.LogStart)
 
-	for update := range updates {
-		if update.Message == nil {
-			continue
-		}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
 
-		userID := update.Message.From.ID
-		chatID := update.Message.Chat.ID
-
-		log.Println(messages.LogMessageReceived(update.Message.From.UserName, userID, update.Message.Text))
-
-		if update.Message.IsCommand() {
-			responseMsg := tgbotapi.NewMessage(chatID, "")
-			responseMsg.ParseMode = "Markdown"
-
-			switch update.Message.Command() {
-			case "start":
-				responseMsg.Text = messages.RespGreet
-			case "help":
-				responseMsg.Text = messages.RespHelp
-			case "about":
-				responseMsg.Text = messages.RespAbout
-			case "earn", "spend":
-				tx, userErrMsg := database.ParseTransactionMsg(update.Message.Text)
-				if userErrMsg != "" {
-					responseMsg.Text = userErrMsg
-					break
+		for {
+			select {
+			case <-done:
+				return
+			case update := <-updates:
+				if update.Message == nil {
+					continue
 				}
 
-				if err := database.AddTransaction(db, userID, tx); err != nil {
-					responseMsg.Text = messages.RespTransactionFailed
-					log.Println(messages.LogDBError(err))
-				} else {
-					responseMsg.Text = messages.RespTransactionSuccess(tx.Type, tx.Amount, tx.Note)
-					log.Println(messages.LogTransactionSaved(tx.Type, tx.Amount, userID))
-				}
-			case "today":
-				transactions, totalAmount, err := database.GetTodayTransactions(db, userID)
-				if err != nil {
-					log.Println("cant read. placeholder")
-					break
-				}
+				userID := update.Message.From.ID
+				chatID := update.Message.Chat.ID
 
-				responseMsg.Text = messages.RespTodayTransactions(transactions, totalAmount)
-			default:
-				responseMsg.Text = messages.RespDefault
+				log.Println(messages.LogMessageReceived(update.Message.From.UserName, userID, update.Message.Text))
+
+				if update.Message.IsCommand() {
+					responseMsg := tgbotapi.NewMessage(chatID, "")
+					responseMsg.ParseMode = "Markdown"
+
+					switch update.Message.Command() {
+					case "start":
+						responseMsg.Text = messages.RespGreet
+					case "help":
+						responseMsg.Text = messages.RespHelp
+					case "about":
+						responseMsg.Text = messages.RespAbout
+					case "earn", "spend":
+						tx, userErrMsg := database.ParseTransactionMsg(update.Message.Text)
+						if userErrMsg != "" {
+							responseMsg.Text = userErrMsg
+							break
+						}
+
+						if err := database.AddTransaction(db, userID, tx); err != nil {
+							responseMsg.Text = messages.RespTransactionFailed
+							log.Println(messages.LogDBError(err))
+						} else {
+							responseMsg.Text = messages.RespTransactionSuccess(tx.Type, tx.Amount, tx.Note)
+							log.Println(messages.LogTransactionSaved(tx.Type, tx.Amount, userID))
+						}
+					case "today":
+						transactions, totalAmount, err := database.GetTodayTransactions(db, userID)
+						if err != nil {
+							log.Println("cant read. placeholder")
+							break
+						}
+
+						responseMsg.Text = messages.RespTodayTransactions(transactions, totalAmount)
+					default:
+						responseMsg.Text = messages.RespDefault
+					}
+
+					if _, err := bot.Send(responseMsg); err != nil {
+						log.Printf("Failed to send message: %v", err)
+					}
+				}
 			}
-
-			if _, err := bot.Send(responseMsg); err != nil {
-				log.Printf("Failed to send message: %v", err)
-			}
 		}
-	}
+	}()
+
+	sig := <-sigChan
+	log.Printf("receive signal: %v", sig)
+
+	close(done)
+	bot.StopReceivingUpdates()
+
+	wg.Wait()
+	log.Println("Shutdown complete. Fare thee well!")
 }
 
 func setBotCommands(bot *tgbotapi.BotAPI) {
