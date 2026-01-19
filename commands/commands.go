@@ -18,7 +18,12 @@ func HandleMessage(update tgbotapi.Update, db *sql.DB, done <-chan struct{}) *tg
 	userID := update.Message.From.ID
 	chatID := update.Message.Chat.ID
 
-	log.Println(messages.LogMessageReceived(update.Message.From.UserName, userID, update.Message.Text))
+	log.Println(messages.LogMessageReceived(
+		update.Message.From.UserName,
+		userID,
+		update.Message.Text,
+		update.Message.Date,
+	))
 
 	if !update.Message.IsCommand() {
 		return nil
