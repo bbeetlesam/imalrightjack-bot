@@ -84,6 +84,14 @@ func GetTodayTransactions(db *sql.DB, userID int64) ([]models.Transaction, int64
 			return nil, 0, err
 		}
 
+		txTime, err := time.Parse(time.RFC3339, timestamp)
+		if err != nil {
+			transaction.Time = ""
+		} else {
+			localTime := txTime.In(now.Location())
+			transaction.Time = localTime.Format("15:04")
+		}
+
 		switch transaction.Type {
 		case "spend":
 			totalAmount -= transaction.Amount

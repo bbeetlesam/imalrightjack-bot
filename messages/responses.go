@@ -25,6 +25,9 @@ const (
 	RespErrInvalidAmount  string = "Invalid amount! Use positive numbers only (e.g. 67000)\nNo commas, dots, and letters allowed."
 )
 
+// will be later moved to somewhere proper, like configs
+const currencySign = "Rp\\."
+
 func RespTransactionSuccess(act string, amount int64, note string) string {
 	noteText := "-"
 	action := "spent"
@@ -41,21 +44,31 @@ func RespTransactionSuccess(act string, amount int64, note string) string {
 
 func RespTodayTransactions(transactions []models.Transaction, totalAmount int64) string {
 	message := ""
-	typeUppercase := func(str string) string {
+	prefixEmoji := func(str string) string {
 		if str == "spend" {
-			return "- Spent"
+			return "➖ "
 		}
-		return "+ Earned"
+		return "➕ "
 	}
 
 	if len(transactions) == 0 {
 		message = "You have no transactions today, at least according to Jack's records."
 	} else {
 		message = "Your transactions today, recorded:\n\n"
+		displayAmount := ""
+
 		for _, transaction := range transactions {
-			message += typeUppercase(transaction.Type) + " Rp " + strconv.FormatInt(transaction.Amount, 10) + "\n"
+			message += prefixEmoji(transaction.Type) + "\\[" + transaction.Time + "\\] "
+			message += currencySign + " " + strconv.FormatInt(transaction.Amount, 10) + "\n"
 		}
-		message += "\nTotal: Rp " + strconv.FormatInt(totalAmount, 10)
+
+		if totalAmount >= 0 {
+			displayAmount = currencySign + " " + strconv.FormatInt(totalAmount, 10)
+		} else {
+			displayAmount = "\\-" + currencySign + " " + strconv.FormatInt(-totalAmount, 10)
+		}
+
+		message += "\n💰 Total: " + displayAmount
 	}
 
 	return message

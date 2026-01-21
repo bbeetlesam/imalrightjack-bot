@@ -5,6 +5,7 @@ type Transaction struct {
 	Type   string
 	Amount int64
 	Note   string
+	Time   string
 }
 
 type BotConfig struct {
