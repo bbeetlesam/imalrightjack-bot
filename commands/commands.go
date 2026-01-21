@@ -30,7 +30,7 @@ func HandleMessage(update tgbotapi.Update, db *sql.DB, done <-chan struct{}) *tg
 	}
 
 	responseMsg := tgbotapi.NewMessage(chatID, "")
-	responseMsg.ParseMode = "Markdown"
+	responseMsg.ParseMode = "MarkdownV2"
 
 	switch update.Message.Command() {
 	case "start":
