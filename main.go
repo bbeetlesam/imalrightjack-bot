@@ -66,6 +66,12 @@ func main() {
 				if responseMsg != nil {
 					if _, err := bot.Send(responseMsg); err != nil {
 						log.Printf("Failed to send message: %v", err)
+						fallbackMsg := tgbotapi.NewMessage(responseMsg.ChatID, messages.RespFallbackMsg)
+						fallbackMsg.ParseMode = "Markdown"
+
+						if _, err := bot.Send(fallbackMsg); err != nil {
+							log.Printf("Failed to send fallback message: %v", err)
+						}
 					}
 				}
 			}
