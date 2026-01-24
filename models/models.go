@@ -13,3 +13,8 @@ type BotConfig struct {
 	DatabaseToken string
 	DatabaseURL   string
 }
+
+type Command struct {
+	Action string
+	Bot    string
+}
