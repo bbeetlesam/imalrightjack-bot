@@ -8,6 +8,7 @@ import (
 
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
 	"github.com/bbeetlesam/imalrightjack-bot/models"
+	"github.com/bbeetlesam/imalrightjack-bot/utils"
 )
 
 func AddTransaction(db *sql.DB, userID int64, tx *models.Transaction) error {
@@ -23,18 +24,19 @@ func AddTransaction(db *sql.DB, userID int64, tx *models.Transaction) error {
 func ParseTransactionMsg(msgText string) (*models.Transaction, string) {
 	args := strings.SplitN(msgText, " ", 3)
 	maxNoteLength := 75
+	maxAmount := 999999999999
 	note := ""
 
 	if len(args) < 2 {
 		return nil, messages.RespErrAmount
 	}
 
-	// parse command type [spend | earn]
-	cmdType := strings.TrimPrefix(args[0], "/")
+	// parse command type, and its bot name (after @) if any
+	command := utils.ParseCommand(args[0])
 
 	// parse amount (positive int, not float)
 	amount, err := strconv.ParseInt(args[1], 10, 64)
-	if err != nil || amount <= 0 {
+	if err != nil || amount <= 0 || amount >= int64(maxAmount) {
 		return nil, messages.RespErrInvalidAmount
 	}
 
@@ -46,7 +48,7 @@ func ParseTransactionMsg(msgText string) (*models.Transaction, string) {
 		}
 	}
 
-	return &models.Transaction{Type: cmdType, Amount: amount, Note: note}, ""
+	return &models.Transaction{Type: command.Action, Amount: amount, Note: note}, ""
 }
 
 func GetTodayTransactions(db *sql.DB, userID int64) ([]models.Transaction, int64, error) {
