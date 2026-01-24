@@ -11,6 +11,11 @@ import (
 	"github.com/bbeetlesam/imalrightjack-bot/utils"
 )
 
+const (
+	MaxNoteLen           = 75
+	MaxTransactionAmount = int64(999_999_999_999)
+)
+
 func AddTransaction(db *sql.DB, userID int64, tx *models.Transaction) error {
 	query := `INSERT INTO transactions (user_id, type, timestamp, amount, note)
 		VALUES (?, ?, ?, ?, ?)
@@ -23,8 +28,6 @@ func AddTransaction(db *sql.DB, userID int64, tx *models.Transaction) error {
 
 func ParseTransactionMsg(msgText string) (*models.Transaction, string) {
 	args := strings.SplitN(msgText, " ", 3)
-	maxNoteLength := 75
-	maxAmount := 999999999999
 	note := ""
 
 	if len(args) < 2 {
@@ -36,15 +39,15 @@ func ParseTransactionMsg(msgText string) (*models.Transaction, string) {
 
 	// parse amount (positive int, not float)
 	amount, err := strconv.ParseInt(args[1], 10, 64)
-	if err != nil || amount <= 0 || amount >= int64(maxAmount) {
+	if err != nil || amount <= 0 || amount >= MaxTransactionAmount {
 		return nil, messages.RespErrInvalidAmount
 	}
 
 	// parse note (truncated if length > 75)
 	if len(args) >= 3 {
 		note = args[2]
-		if len(note) > maxNoteLength {
-			note = note[:maxNoteLength]
+		if len(note) > MaxNoteLen {
+			note = note[:MaxNoteLen]
 		}
 	}
 
