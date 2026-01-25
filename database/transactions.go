@@ -39,7 +39,7 @@ func ParseTransactionMsg(msgText string) (*models.Transaction, string) {
 
 	// parse amount (positive int, not float)
 	amount, err := strconv.ParseInt(args[1], 10, 64)
-	if err != nil || amount <= 0 || amount >= MaxTransactionAmount {
+	if err != nil || amount <= 0 || amount > MaxTransactionAmount {
 		return nil, messages.RespErrInvalidAmount
 	}
 
