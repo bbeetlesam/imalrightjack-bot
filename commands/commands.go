@@ -2,6 +2,7 @@
 package commands
 
 import (
+	"context"
 	"database/sql"
 	"log"
 
@@ -10,7 +11,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func HandleMessage(update tgbotapi.Update, db *sql.DB, done <-chan struct{}) *tgbotapi.MessageConfig {
+func HandleMessage(ctx context.Context, update tgbotapi.Update, db *sql.DB) *tgbotapi.MessageConfig {
 	if update.Message == nil {
 		return nil
 	}
@@ -40,9 +41,9 @@ func HandleMessage(update tgbotapi.Update, db *sql.DB, done <-chan struct{}) *tg
 	case "about":
 		responseMsg.Text = messages.RespAbout
 	case "earn", "spend":
-		responseMsg.Text = handleTransaction(update, db, userID, done)
+		responseMsg.Text = handleTransaction(ctx, update, db, userID)
 	case "today":
-		responseMsg.Text = handleTodayReport(db, userID, done)
+		responseMsg.Text = handleTodayReport(ctx, db, userID)
 	default:
 		responseMsg.Text = messages.RespDefault
 	}
@@ -50,19 +51,19 @@ func HandleMessage(update tgbotapi.Update, db *sql.DB, done <-chan struct{}) *tg
 	return &responseMsg
 }
 
-func handleTransaction(update tgbotapi.Update, db *sql.DB, userID int64, done <-chan struct{}) string {
+func handleTransaction(ctx context.Context, update tgbotapi.Update, db *sql.DB, userID int64) string {
 	tx, userErrMsg := database.ParseTransactionMsg(update.Message.Text)
 	if userErrMsg != "" {
 		return userErrMsg
 	}
 
 	// check shutdown before db write (prevents duplicate transactions on restart)
-	if shouldShutdown(done) {
+	if ctx.Err() != nil {
 		log.Println("Shutdown signal received, skipping transaction")
 		return messages.RespTransactionFailed
 	}
 
-	if err := database.AddTransaction(db, userID, tx); err != nil {
+	if err := database.AddTransaction(ctx, db, userID, tx); err != nil {
 		log.Println(messages.LogDBError(err))
 		return messages.RespTransactionFailed
 	}
@@ -71,27 +72,18 @@ func handleTransaction(update tgbotapi.Update, db *sql.DB, userID int64, done <-
 	return messages.RespTransactionSuccess(tx.Type, tx.Amount, tx.Note)
 }
 
-func handleTodayReport(db *sql.DB, userID int64, done <-chan struct{}) string {
+func handleTodayReport(ctx context.Context, db *sql.DB, userID int64) string {
 	// check shutdown before db read
-	if shouldShutdown(done) {
+	if ctx.Err() != nil {
 		log.Println("Shutdown signal received, skipping report")
 		return messages.RespDefault
 	}
 
-	transactions, totalAmount, err := database.GetTodayTransactions(db, userID)
+	transactions, totalAmount, err := database.GetTodayTransactions(ctx, db, userID)
 	if err != nil {
 		log.Printf("Failed to get today's transactions: %v", err)
 		return "Failed to retrieve today's transactions. Please try again."
 	}
 
 	return messages.RespTodayTransactions(transactions, totalAmount)
-}
-
-func shouldShutdown(done <-chan struct{}) bool {
-	select {
-	case <-done:
-		return true
-	default:
-		return false
-	}
 }

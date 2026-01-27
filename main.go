@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"os/signal"
@@ -50,7 +51,8 @@ func main() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
-	done := make(chan struct{})
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	var wg sync.WaitGroup
 
@@ -59,10 +61,10 @@ func main() {
 	wg.Go(func() {
 		for {
 			select {
-			case <-done:
+			case <-ctx.Done():
 				return
 			case update := <-updates:
-				responseMsg := commands.HandleMessage(update, db, done)
+				responseMsg := commands.HandleMessage(ctx, update, db)
 				if responseMsg != nil {
 					if _, err := bot.Send(responseMsg); err != nil {
 						log.Printf("Failed to send message: %v", err)
@@ -81,11 +83,13 @@ func main() {
 	sig := <-sigChan
 	log.Println(messages.LogSignalOSReceived(sig))
 
-	close(done)
+	cancel()
 	bot.StopReceivingUpdates()
 
 	wg.Wait()
+
 	log.Println(messages.LogExitProgram)
+	os.Exit(0)
 }
 
 func setBotCommands(bot *tgbotapi.BotAPI) {

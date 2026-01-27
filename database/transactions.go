@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"strconv"
 	"strings"
@@ -16,13 +17,13 @@ const (
 	MaxTransactionAmount = int64(999_999_999_999)
 )
 
-func AddTransaction(db *sql.DB, userID int64, tx *models.Transaction) error {
+func AddTransaction(ctx context.Context, db *sql.DB, userID int64, tx *models.Transaction) error {
 	query := `INSERT INTO transactions (user_id, type, timestamp, amount, note)
 		VALUES (?, ?, ?, ?, ?)
 	;`
 
 	timestamp := time.Now().UTC().Format(time.RFC3339)
-	_, err := db.Exec(query, userID, tx.Type, timestamp, tx.Amount, tx.Note)
+	_, err := db.ExecContext(ctx, query, userID, tx.Type, timestamp, tx.Amount, tx.Note)
 	return err
 }
 
@@ -54,7 +55,7 @@ func ParseTransactionMsg(msgText string) (*models.Transaction, string) {
 	return &models.Transaction{Type: command.Action, Amount: amount, Note: note}, ""
 }
 
-func GetTodayTransactions(db *sql.DB, userID int64) ([]models.Transaction, int64, error) {
+func GetTodayTransactions(ctx context.Context, db *sql.DB, userID int64) ([]models.Transaction, int64, error) {
 	now := time.Now() // use system timezone
 
 	// calculate start and end of today (00:00:00) - (24:00:00) in the used timezone
@@ -71,7 +72,7 @@ func GetTodayTransactions(db *sql.DB, userID int64) ([]models.Transaction, int64
 		ORDER BY timestamp DESC
 	;`
 
-	rows, err := db.Query(query, userID, startUTC, endUTC)
+	rows, err := db.QueryContext(ctx, query, userID, startUTC, endUTC)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -106,6 +107,10 @@ func GetTodayTransactions(db *sql.DB, userID int64) ([]models.Transaction, int64
 
 		transactions = append(transactions, transaction)
 	}
+
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
+	} 
 
 	return transactions, totalAmount, nil
 }
