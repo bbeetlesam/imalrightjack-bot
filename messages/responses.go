@@ -54,7 +54,7 @@ func RespTodayTransactions(transactions []models.Transaction, totalAmount int64)
 	}
 
 	if len(transactions) == 0 {
-		message = "You have no transactions today, at least according to Jack's records."
+		message = "You have no transactions today, at least according to Jack's records\\."
 	} else {
 		message = "Your transactions today, recorded:\n\n"
 		displayAmount := ""
