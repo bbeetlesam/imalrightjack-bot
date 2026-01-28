@@ -12,6 +12,7 @@ import (
 	"github.com/bbeetlesam/imalrightjack-bot/config"
 	"github.com/bbeetlesam/imalrightjack-bot/database"
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
+	"github.com/bbeetlesam/imalrightjack-bot/utils"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -40,7 +41,7 @@ func main() {
 
 	setBotCommands(bot)
 
-	log.Println(messages.LogBotAuthorised(bot.Self.UserName)) // if successfully connected
+  utils.LogColor("info", messages.LogBotAuthorised(bot.Self.UserName)) // if successfully connected
 
 	u := tgbotapi.NewUpdate(0) // creates an UpdateConfig obj
 	u.Timeout = 60
@@ -56,7 +57,7 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	log.Println(messages.LogStart)
+	utils.LogColor("info", messages.LogStart)
 
 	wg.Go(func() {
 		for {
@@ -67,12 +68,12 @@ func main() {
 				responseMsg := commands.HandleMessage(ctx, update, db)
 				if responseMsg != nil {
 					if _, err := bot.Send(responseMsg); err != nil {
-						log.Printf("Failed to send message: %v", err)
+						utils.LogColorf("errs", "Failed to send message: %v", err)
 						fallbackMsg := tgbotapi.NewMessage(responseMsg.ChatID, messages.RespFallbackMsg)
 						fallbackMsg.ParseMode = "Markdown"
 
 						if _, err := bot.Send(fallbackMsg); err != nil {
-							log.Printf("Failed to send fallback message: %v", err)
+							utils.LogColorf("errs", "Failed to send fallback message: %v", err)
 						}
 					}
 				}
@@ -81,14 +82,14 @@ func main() {
 	})
 
 	sig := <-sigChan
-	log.Println(messages.LogSignalOSReceived(sig))
+	utils.LogColor("warn", messages.LogSignalOSReceived(sig))
 
 	cancel()
 	bot.StopReceivingUpdates()
 
 	wg.Wait()
 
-	log.Println(messages.LogExitProgram)
+	utils.LogColor("info", messages.LogExitProgram)
 	os.Exit(0)
 }
 
@@ -105,6 +106,6 @@ func setBotCommands(bot *tgbotapi.BotAPI) {
 	cmdConfig := tgbotapi.NewSetMyCommands(commands...)
 	_, err := bot.Request(cmdConfig)
 	if err != nil {
-		log.Printf("Failed to set commands: %v", err)
+		utils.LogColorf("warn", "Failed to set commands: %v", err)
 	}
 }

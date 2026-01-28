@@ -4,10 +4,10 @@ package commands
 import (
 	"context"
 	"database/sql"
-	"log"
 
 	"github.com/bbeetlesam/imalrightjack-bot/database"
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
+	"github.com/bbeetlesam/imalrightjack-bot/utils"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -19,7 +19,7 @@ func HandleMessage(ctx context.Context, update tgbotapi.Update, db *sql.DB) *tgb
 	userID := update.Message.From.ID
 	chatID := update.Message.Chat.ID
 
-	log.Println(messages.LogMessageReceived(
+	utils.LogColor("updt", messages.LogMessageReceived(
 		update.Message.From.UserName,
 		userID,
 		update.Message.Text,
@@ -59,29 +59,29 @@ func handleTransaction(ctx context.Context, update tgbotapi.Update, db *sql.DB, 
 
 	// check shutdown before db write (prevents duplicate transactions on restart)
 	if ctx.Err() != nil {
-		log.Println("Shutdown signal received, skipping transaction")
+		utils.LogColor("warn", "Shutdown signal received, skipping transaction")
 		return messages.RespTransactionFailed
 	}
 
 	if err := database.AddTransaction(ctx, db, userID, tx); err != nil {
-		log.Println(messages.LogDBError(err))
+		utils.LogColor("errs", messages.LogDBError(err))
 		return messages.RespTransactionFailed
 	}
 
-	log.Println(messages.LogTransactionSaved(tx.Type, tx.Amount, userID))
+	utils.LogColor("dbwr", messages.LogTransactionSaved(tx.Type, tx.Amount, userID))
 	return messages.RespTransactionSuccess(tx.Type, tx.Amount, tx.Note)
 }
 
 func handleTodayReport(ctx context.Context, db *sql.DB, userID int64) string {
 	// check shutdown before db read
 	if ctx.Err() != nil {
-		log.Println("Shutdown signal received, skipping report")
+		utils.LogColor("warn", "Shutdown signal received, skipping report")
 		return messages.RespDefault
 	}
 
 	transactions, totalAmount, err := database.GetTodayTransactions(ctx, db, userID)
 	if err != nil {
-		log.Printf("Failed to get today's transactions: %v", err)
+		utils.LogColorf("errs", "Failed to get today's transactions: %v", err)
 		return "Failed to retrieve today's transactions. Please try again."
 	}
 

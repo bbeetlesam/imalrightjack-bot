@@ -3,10 +3,10 @@ package database
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
 	"github.com/bbeetlesam/imalrightjack-bot/models"
+	"github.com/bbeetlesam/imalrightjack-bot/utils"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
@@ -20,7 +20,7 @@ func Open(botCfg *models.BotConfig) (*sql.DB, error) {
 	if err := db.Ping(); err != nil {
 		return nil, err
 	}
-	log.Println(messages.LogDBConnected) // supersister
+	utils.LogColor("info", messages.LogDBConnected) // supersister
 
 	return db, nil
 }
