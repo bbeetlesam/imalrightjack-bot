@@ -2,6 +2,7 @@
 package models
 
 type Transaction struct {
+	ID     int64
 	Type   string
 	Amount int64
 	Note   string
