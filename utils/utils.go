@@ -2,6 +2,7 @@
 package utils
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/bbeetlesam/imalrightjack-bot/models"
@@ -25,7 +26,7 @@ func EscapeMarkdownV2(text string) string {
 }
 
 // ParseCommand parses a command string, e.g. "/earn" and "/earn@bot" and returns
-// the command type ("spend" or "earn") and the bot name.
+// the command type (e.g. "earn") and the bot name.
 func ParseCommand(command string) models.Command {
 	cmd := strings.TrimPrefix(command, "/")
 	cmdType, cmdBot, _ := strings.Cut(cmd, "@")
@@ -34,4 +35,17 @@ func ParseCommand(command string) models.Command {
 		Action: cmdType,
 		Bot:    cmdBot,
 	}
+}
+
+// Itoa64 serves the same purpose as strconv.Itoa(), but for in64 type.
+func Itoa64(i int64) string {
+	return strconv.FormatInt(i, 10)
+}
+
+// ParseCommandMsg parses the whole command message and returns a string list.
+// Not to be confused with ParseCommand() which only parses the prefix command from the message.
+func ParseCommandMsg(msg string, argAmount int) []string {
+	args := strings.SplitN(msg, " ", argAmount)
+
+	return args
 }
