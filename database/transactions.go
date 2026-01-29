@@ -110,7 +110,7 @@ func GetTodayTransactions(ctx context.Context, db *sql.DB, userID int64) ([]mode
 
 	if err := rows.Err(); err != nil {
 		return nil, 0, err
-	} 
+	}
 
 	return transactions, totalAmount, nil
 }
@@ -134,8 +134,14 @@ func GetTransactionByID(ctx context.Context, db *sql.DB, userID int64, txID int6
 		return models.Transaction{}, err
 	}
 
-	txTime, _ := time.Parse(time.RFC3339, timestamp)
-	tx.Time = txTime.Format("2006-01-02 15:04:05")
+	txTime, err := time.Parse(time.RFC3339, timestamp)
+	if err != nil {
+		return models.Transaction{}, err
+	}
+
+	// TODO: currently uses system timezone, use custom timezone preference later
+	localTime := txTime.In(time.Local)
+	tx.Time = localTime.Format("2006-01-02 15:04")
 
 	return tx, nil
 }
