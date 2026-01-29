@@ -25,6 +25,7 @@ func Open(botCfg *models.BotConfig) (*sql.DB, error) {
 	return db, nil
 }
 
+// TODO: new table schema for user preferences (currenct, timezone, language)
 func InitSchema(db *sql.DB) error {
 	query := `CREATE TABLE IF NOT EXISTS transactions ( 
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
