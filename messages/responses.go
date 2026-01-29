@@ -25,7 +25,7 @@ const (
 	RespErrAmount           string = "Please specify the amount, and optionally the notes\\."
 	RespErrInvalidAmount    string = "Invalid amount! Use positive numbers only (e.g. 67000)\nNo commas, dots, and letters allowed\\."
 	RespFallbackMsg         string = "⚠️ Sorry, there's a problem on Jack's voice currently.\n\n"
-	RespTransactionNotExist string = "There is no transaction log with that ID\\."
+	RespTransactionNotExist string = "You have no transaction log with that ID\\."
 )
 
 // will be later moved to somewhere proper, like configs
