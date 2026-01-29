@@ -21,10 +21,11 @@ const (
 		"your financial flow, like your income and outcome\\. His mind is very simple and intuitive though, like " +
 		"basic income and expense logs, daily report, et cetera\\.\n\nMind you, Jack loves anything that smells money, " +
 		"so I think you can trust him\\."
-	RespTransactionFailed string = "ERROR: Failed to save the transaction.\nPlease try again\\."
-	RespErrAmount         string = "Please specify the amount, and optionally the notes\\."
-	RespErrInvalidAmount  string = "Invalid amount! Use positive numbers only (e.g. 67000)\nNo commas, dots, and letters allowed\\."
-	RespFallbackMsg 			string = "⚠️ Sorry, there's a problem on Jack's voice currently.\n\n"
+	RespTransactionFailed   string = "ERROR: Failed to save the transaction.\nPlease try again\\."
+	RespErrAmount           string = "Please specify the amount, and optionally the notes\\."
+	RespErrInvalidAmount    string = "Invalid amount! Use positive numbers only (e.g. 67000)\nNo commas, dots, and letters allowed\\."
+	RespFallbackMsg         string = "⚠️ Sorry, there's a problem on Jack's voice currently.\n\n"
+	RespTransactionNotExist string = "There is no transaction log with that ID\\."
 )
 
 // will be later moved to somewhere proper, like configs
@@ -48,9 +49,9 @@ func RespTodayTransactions(transactions []models.Transaction, totalAmount int64)
 	message := ""
 	prefixEmoji := func(str string) string {
 		if str == "spend" {
-			return "➖ "
+			return "`\\[\\-\\]` " //➖
 		}
-		return "➕ "
+		return "`\\[\\+\\]` " //➕
 	}
 
 	if len(transactions) == 0 {
@@ -60,18 +61,29 @@ func RespTodayTransactions(transactions []models.Transaction, totalAmount int64)
 		displayAmount := ""
 
 		for _, transaction := range transactions {
-			message += prefixEmoji(transaction.Type) + "\\[" + transaction.Time + "\\] "
+			message += prefixEmoji(transaction.Type) + "\\(" + transaction.Time + "\\) "
 			message += currencySign + " " + strconv.FormatInt(transaction.Amount, 10) + "\n"
 		}
 
 		if totalAmount >= 0 {
-			displayAmount = currencySign + " " + strconv.FormatInt(totalAmount, 10)
+			displayAmount = currencySign + " " + utils.Itoa64(totalAmount)
 		} else {
-			displayAmount = "\\-" + currencySign + " " + strconv.FormatInt(-totalAmount, 10)
+			displayAmount = "\\-" + currencySign + " " + utils.Itoa64(-totalAmount)
 		}
 
 		message += "\n💰 Total: " + displayAmount
 	}
 
 	return message
+}
+
+func RespDetailedTransaction(tx models.Transaction) string {
+	response := "📝 Transaction `\\#" + utils.Itoa64(tx.ID) + "`:\n\n"
+
+	response += "Type: " + tx.Type + "\n"
+	response += "Amount: " + utils.Itoa64(tx.Amount) + "\n"
+	response += "Date: " + utils.EscapeMarkdownV2(tx.Time) + "\n"
+	response += "Note: " + utils.EscapeMarkdownV2(tx.Note) + "\n"
+
+	return response
 }

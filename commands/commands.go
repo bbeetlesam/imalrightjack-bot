@@ -4,6 +4,7 @@ package commands
 import (
 	"context"
 	"database/sql"
+	"strconv"
 
 	"github.com/bbeetlesam/imalrightjack-bot/database"
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
@@ -44,6 +45,8 @@ func HandleMessage(ctx context.Context, update tgbotapi.Update, db *sql.DB) *tgb
 		responseMsg.Text = handleTransaction(ctx, update, db, userID)
 	case "today":
 		responseMsg.Text = handleTodayReport(ctx, db, userID)
+	case "getlog":
+		responseMsg.Text = handleGetLog(ctx, update, db, userID)
 	default:
 		responseMsg.Text = messages.RespDefault
 	}
@@ -86,4 +89,27 @@ func handleTodayReport(ctx context.Context, db *sql.DB, userID int64) string {
 	}
 
 	return messages.RespTodayTransactions(transactions, totalAmount)
+}
+
+// currently applies for by ID
+// TODO: use this for global getter (today, this month, week, date, etc)
+func handleGetLog(ctx context.Context, update tgbotapi.Update, db *sql.DB, userID int64) string {
+	if ctx.Err() != nil {
+		utils.LogColor("warn", "idontkow")
+		return messages.RespDefault
+	}
+
+	msg := utils.ParseCommandMsg(update.Message.Text, 2)
+	if len(msg) != 2 {
+		return "Please specify the ID\\."
+	}
+
+	txID, _ := strconv.Atoi(msg[1])
+	tx, err := database.GetTransactionByID(ctx, db, userID, int64(txID))
+	if err != nil {
+		utils.LogColorf("errs", "failed to get transaction #%s: %v", msg[1], err)
+		return messages.RespTransactionNotExist
+	}
+
+	return messages.RespDetailedTransaction(tx)
 }
