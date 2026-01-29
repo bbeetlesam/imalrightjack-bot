@@ -66,7 +66,7 @@ func GetTodayTransactions(ctx context.Context, db *sql.DB, userID int64) ([]mode
 	startUTC := startOfDay.UTC().Format(time.RFC3339)
 	endUTC := endOfDay.UTC().Format(time.RFC3339)
 
-	query := `SELECT type, timestamp, amount, note
+	query := `SELECT id, type, timestamp, amount, note
 		FROM transactions
 		WHERE user_id = ? AND timestamp >= ? AND timestamp < ?
 		ORDER BY timestamp DESC
@@ -86,7 +86,7 @@ func GetTodayTransactions(ctx context.Context, db *sql.DB, userID int64) ([]mode
 		var transaction models.Transaction
 		var timestamp string
 
-		if err := rows.Scan(&transaction.Type, &timestamp, &transaction.Amount, &transaction.Note); err != nil {
+		if err := rows.Scan(&transaction.ID, &transaction.Type, &timestamp, &transaction.Amount, &transaction.Note); err != nil {
 			return nil, 0, err
 		}
 
@@ -113,4 +113,29 @@ func GetTodayTransactions(ctx context.Context, db *sql.DB, userID int64) ([]mode
 	} 
 
 	return transactions, totalAmount, nil
+}
+
+func GetTransactionByID(ctx context.Context, db *sql.DB, userID int64, txID int64) (models.Transaction, error) {
+	var tx models.Transaction
+	var timestamp string
+
+	query := `SELECT id, type, timestamp, amount, note
+		FROM transactions
+		WHERE id = ? AND user_id = ?
+	;`
+
+	row := db.QueryRowContext(ctx, query, txID, userID)
+	err := row.Scan(&tx.ID, &tx.Type, &timestamp, &tx.Amount, &tx.Note)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return models.Transaction{}, err // DUPLICATED!!
+		}
+		return models.Transaction{}, err
+	}
+
+	txTime, _ := time.Parse(time.RFC3339, timestamp)
+	tx.Time = txTime.Format("2006-01-02 15:04:05")
+
+	return tx, nil
 }

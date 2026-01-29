@@ -101,6 +101,7 @@ func setBotCommands(bot *tgbotapi.BotAPI) {
 		{Command: "earn", Description: "Log an income"},
 		{Command: "spend", Description: "Log an expense"},
 		{Command: "today", Description: "Today’s damage report"},
+		{Command: "getlog", Description: "Get a transaction log by ID"},
 	}
 
 	cmdConfig := tgbotapi.NewSetMyCommands(commands...)
