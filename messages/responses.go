@@ -22,7 +22,7 @@ const (
 		"so I think you can trust him\\."
 	RespTransactionFailed   string = "ERROR: Failed to save the transaction.\nPlease try again\\."
 	RespErrAmount           string = "Please specify the amount, and optionally the notes\\."
-	RespErrInvalidAmount    string = "Invalid amount! Use positive numbers only (e.g. 67000)\nNo commas, dots, and letters allowed\\."
+	RespErrInvalidAmount    string = "Invalid amount\\! Use positive numbers only \\(e\\.g\\. 67000\\)\nNo commas, dots, and letters allowed\\."
 	RespFallbackMsg         string = "⚠️ Sorry, there's a problem on Jack's voice currently.\n\n"
 	RespTransactionNotExist string = "You have no transaction log with that ID\\."
 	RespInvalidParse        string = "Invalid use of command\\.\nConsider to /help to know how to use them\\."
@@ -42,16 +42,16 @@ func RespTransactionSuccess(act string, id int64, amount int64, note string) str
 		action = "Earned"
 	}
 
-	return fmt.Sprintf("📒 Jack has saved your transaction log \\(`#%d`\\)\\!\n\n💸 *%s* %s %d\n✏️ Note: %s", id, action, currencySign, amount, noteText)
+	return fmt.Sprintf("📒 Jack has saved your transaction log \\(`#%d`\\)\\!\n\n💵 *%s* %s %d\n✏️ Note: %s", id, action, currencySign, amount, noteText)
 }
 
 func RespTodayTransactions(transactions []models.Transaction, totalAmount int64) string {
 	message := ""
 	prefixEmoji := func(str string) string {
 		if str == "spend" {
-			return "`\\[\\-\\]` " //➖
+			return "\\[`\\-`\\]" //➖
 		}
-		return "`\\[\\+\\]` " //➕
+		return "\\[`\\+`\\]" //➕
 	}
 
 	if len(transactions) == 0 {
@@ -61,9 +61,10 @@ func RespTodayTransactions(transactions []models.Transaction, totalAmount int64)
 		displayAmount := ""
 
 		for _, transaction := range transactions {
-			message += prefixEmoji(transaction.Type) + "\\(" + transaction.Time + "\\) "
-			message += currencySign + " " + utils.Itoa64(transaction.Amount)
-			message += " `#" + utils.Itoa64(transaction.ID) + "`\n"
+			message += prefixEmoji(transaction.Type)
+			message += " \\[`#" + utils.Itoa64(transaction.ID) + "`\\] "
+			message += "\\(" + transaction.Time + "\\) "
+			message += currencySign + " " + utils.Itoa64(transaction.Amount) + "\n"
 		}
 
 		if totalAmount >= 0 {
@@ -79,12 +80,15 @@ func RespTodayTransactions(transactions []models.Transaction, totalAmount int64)
 }
 
 func RespDetailedTransaction(tx models.Transaction) string {
-	response := "📝 Transaction `\\#" + utils.Itoa64(tx.ID) + "`:\n\n"
+	txType := "Earned"
+	if tx.Type == "spend" {
+		txType = "Spent"
+	}
 
-	response += "Type: " + tx.Type + "\n"
-	response += "Amount: " + utils.Itoa64(tx.Amount) + "\n"
-	response += "Date: " + utils.EscapeMarkdownV2(tx.Time) + "\n"
-	response += "Note: " + utils.EscapeMarkdownV2(tx.Note) + "\n"
+	response := "📝 Transaction `\\#" + utils.Itoa64(tx.ID) + "`:\n\n"
+	response += "💵 " + txType + " *" + currencySign + " " + utils.Itoa64(tx.Amount) + "*\n"
+	response += "🕡 " + utils.EscapeMarkdownV2(tx.Time) + "\n"
+	response += "✏️ " + utils.EscapeMarkdownV2(tx.Note) + "\n"
 
 	return response
 }
