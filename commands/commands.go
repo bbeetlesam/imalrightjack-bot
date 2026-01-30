@@ -107,7 +107,11 @@ func handleGetLog(ctx context.Context, update tgbotapi.Update, db *sql.DB, userI
 		return "Provide only the ID number, not anything else\\."
 	}
 
-	txID, _ := strconv.Atoi(msg[1])
+	txID, err := strconv.Atoi(msg[1])
+	if err != nil {
+		return messages.RespInvalidParse
+	}
+
 	tx, err := database.GetTransactionByID(ctx, db, userID, int64(txID))
 	if err != nil {
 		utils.LogColorf("errs", "failed to get transaction #%s: %v", msg[1], err)
