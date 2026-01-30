@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
@@ -34,7 +33,7 @@ func AddTransaction(ctx context.Context, db *sql.DB, userID int64, tx *models.Tr
 }
 
 func ParseTransactionMsg(msgText string) (*models.Transaction, string) {
-	args := strings.SplitN(msgText, " ", 3)
+	args := utils.StringsFieldsN(msgText, 3)
 	note := ""
 
 	if len(args) < 2 {

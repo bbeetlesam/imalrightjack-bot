@@ -49,3 +49,22 @@ func ParseCommandMsg(msg string) []string {
 
 	return args
 }
+
+// StringFieldsN serves as a combination between strings.Fields() (smart whitespaces parsing)
+// and strings.SplitN (explicit separation amount).
+func StringsFieldsN(str string, n int) []string {
+	if n <= 0 {
+		return nil
+	}
+
+	fields := strings.Fields(str)
+
+	if len(fields) <= n {
+		return fields
+	}
+
+	head := fields[:n-1]
+	tail := strings.Join(fields[n-1:], " ")
+
+	return append(head, tail)
+}
