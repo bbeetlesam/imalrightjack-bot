@@ -66,13 +66,14 @@ func handleTransaction(ctx context.Context, update tgbotapi.Update, db *sql.DB, 
 		return messages.RespTransactionFailed
 	}
 
-	if err := database.AddTransaction(ctx, db, userID, tx); err != nil {
+	var err error
+	if tx.ID, err = database.AddTransaction(ctx, db, userID, tx); err != nil {
 		utils.LogColor("errs", messages.LogDBError(err))
 		return messages.RespTransactionFailed
 	}
 
 	utils.LogColor("dbwr", messages.LogTransactionSaved(tx.Type, tx.Amount, userID))
-	return messages.RespTransactionSuccess(tx.Type, tx.Amount, tx.Note)
+	return messages.RespTransactionSuccess(tx.Type, tx.ID, tx.Amount, tx.Note)
 }
 
 func handleTodayReport(ctx context.Context, db *sql.DB, userID int64) string {

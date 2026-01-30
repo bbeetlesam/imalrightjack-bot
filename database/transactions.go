@@ -17,14 +17,20 @@ const (
 	MaxTransactionAmount = int64(999_999_999_999)
 )
 
-func AddTransaction(ctx context.Context, db *sql.DB, userID int64, tx *models.Transaction) error {
+func AddTransaction(ctx context.Context, db *sql.DB, userID int64, tx *models.Transaction) (int64, error) {
 	query := `INSERT INTO transactions (user_id, type, timestamp, amount, note)
 		VALUES (?, ?, ?, ?, ?)
 	;`
 
 	timestamp := time.Now().UTC().Format(time.RFC3339)
-	_, err := db.ExecContext(ctx, query, userID, tx.Type, timestamp, tx.Amount, tx.Note)
-	return err
+	result, errQuery := db.ExecContext(ctx, query, userID, tx.Type, timestamp, tx.Amount, tx.Note)
+
+	id, err := result.LastInsertId() // get new tx's ID
+	if err != nil {
+		return 0, err
+	}
+
+	return id, errQuery
 }
 
 func ParseTransactionMsg(msgText string) (*models.Transaction, string) {
@@ -69,7 +75,7 @@ func GetTodayTransactions(ctx context.Context, db *sql.DB, userID int64) ([]mode
 	query := `SELECT id, type, timestamp, amount, note
 		FROM transactions
 		WHERE user_id = ? AND timestamp >= ? AND timestamp < ?
-		ORDER BY timestamp DESC
+		ORDER BY timestamp ASC
 	;`
 
 	rows, err := db.QueryContext(ctx, query, userID, startUTC, endUTC)
