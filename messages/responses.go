@@ -25,6 +25,7 @@ const (
 	RespErrInvalidAmount    string = "Invalid amount! Use positive numbers only (e.g. 67000)\nNo commas, dots, and letters allowed\\."
 	RespFallbackMsg         string = "⚠️ Sorry, there's a problem on Jack's voice currently.\n\n"
 	RespTransactionNotExist string = "You have no transaction log with that ID\\."
+	RespInvalidParse        string = "Invalid use of command\\.\nConsider to /help to know how to use them\\."
 )
 
 // will be later moved to somewhere proper, like configs
