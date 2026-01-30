@@ -41,7 +41,7 @@ func main() {
 
 	setBotCommands(bot)
 
-  utils.LogColor("info", messages.LogBotAuthorised(bot.Self.UserName)) // if successfully connected
+	utils.LogColor("info", messages.LogBotAuthorised(bot.Self.UserName)) // if successfully connected
 
 	u := tgbotapi.NewUpdate(0) // creates an UpdateConfig obj
 	u.Timeout = 60

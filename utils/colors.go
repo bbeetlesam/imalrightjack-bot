@@ -8,7 +8,7 @@ const (
 	ColorYellow = "\033[33m"
 	ColorBlue   = "\033[34m"
 	ColorCyan   = "\033[36m"
-	ColorBold 	= "\033[1m"
+	ColorBold   = "\033[1m"
 	ColorReset  = "\033[0m"
 
 	LogTypeInfo = "info"
