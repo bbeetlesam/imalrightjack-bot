@@ -134,9 +134,6 @@ func GetTransactionByID(ctx context.Context, db *sql.DB, userID int64, txID int6
 	err := row.Scan(&tx.ID, &tx.Type, &timestamp, &tx.Amount, &tx.Note)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return models.Transaction{}, err // DUPLICATED!!
-		}
 		return models.Transaction{}, err
 	}
 
