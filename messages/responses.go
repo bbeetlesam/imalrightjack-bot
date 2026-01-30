@@ -2,7 +2,6 @@ package messages
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/bbeetlesam/imalrightjack-bot/models"
 	"github.com/bbeetlesam/imalrightjack-bot/utils"
@@ -31,18 +30,18 @@ const (
 // will be later moved to somewhere proper, like configs
 const currencySign = "Rp\\."
 
-func RespTransactionSuccess(act string, amount int64, note string) string {
+func RespTransactionSuccess(act string, id int64, amount int64, note string) string {
 	noteText := "\\-"
-	action := "spent"
+	action := "Spent"
 
 	if note != "" {
-		noteText = "\n" + utils.EscapeMarkdownV2(note)
+		noteText = utils.EscapeMarkdownV2(note)
 	}
 	if act == "earn" {
-		action = "earned"
+		action = "Earned"
 	}
 
-	return fmt.Sprintf("Jack noted that you _%s_ *%s %d* with note: %s", action, currencySign, amount, noteText)
+	return fmt.Sprintf("📒 Jack has saved your transaction log \\(`#%d`\\)\\!\n\n💸 *%s* %s %d\n✏️ Note: %s", id, action, currencySign, amount, noteText)
 }
 
 func RespTodayTransactions(transactions []models.Transaction, totalAmount int64) string {
@@ -57,12 +56,13 @@ func RespTodayTransactions(transactions []models.Transaction, totalAmount int64)
 	if len(transactions) == 0 {
 		message = "You have no transactions today, at least according to Jack's records\\."
 	} else {
-		message = "Your transactions today, recorded:\n\n"
+		message = "📖 Your transactions today, recorded:\n\n"
 		displayAmount := ""
 
 		for _, transaction := range transactions {
 			message += prefixEmoji(transaction.Type) + "\\(" + transaction.Time + "\\) "
-			message += currencySign + " " + strconv.FormatInt(transaction.Amount, 10) + "\n"
+			message += currencySign + " " + utils.Itoa64(transaction.Amount)
+			message += " `#" + utils.Itoa64(transaction.ID) + "`\n"
 		}
 
 		if totalAmount >= 0 {
