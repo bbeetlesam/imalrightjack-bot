@@ -44,8 +44,8 @@ func Itoa64(i int64) string {
 
 // ParseCommandMsg parses the whole command message and returns a string list.
 // Not to be confused with ParseCommand() which only parses the prefix command from the message.
-func ParseCommandMsg(msg string, argAmount int) []string {
-	args := strings.SplitN(msg, " ", argAmount)
+func ParseCommandMsg(msg string) []string {
+	args := strings.Fields(msg)
 
 	return args
 }
