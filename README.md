@@ -82,7 +82,7 @@ Also, if you're feeling generous and want to help Jack and his creator stay hydr
 ---
 
 Wanna try to use Jack?\
-You can try it [here on Telegram](t.me/alrightjackabot).
+You can try it [here on Telegram](https://t.me/alrightjackabot).
 
 (Jack will make you dependent to him. Beware)
 
