@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"strconv"
+	"time"
 
 	"github.com/bbeetlesam/imalrightjack-bot/database"
 	"github.com/bbeetlesam/imalrightjack-bot/messages"
@@ -59,6 +60,7 @@ func handleTransaction(ctx context.Context, update tgbotapi.Update, db *sql.DB, 
 	if userErrMsg != "" {
 		return userErrMsg
 	}
+	tx.Time = time.Unix(int64(update.Message.Date), 0).UTC().Format(time.RFC3339)
 
 	// check shutdown before db write (prevents duplicate transactions on restart)
 	if ctx.Err() != nil {

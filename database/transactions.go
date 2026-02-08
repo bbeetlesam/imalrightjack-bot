@@ -21,8 +21,7 @@ func AddTransaction(ctx context.Context, db *sql.DB, userID int64, tx *models.Tr
 		VALUES (?, ?, ?, ?, ?)
 	;`
 
-	timestamp := time.Now().UTC().Format(time.RFC3339)
-	result, errQuery := db.ExecContext(ctx, query, userID, tx.Type, timestamp, tx.Amount, tx.Note)
+	result, errQuery := db.ExecContext(ctx, query, userID, tx.Type, tx.Time, tx.Amount, tx.Note)
 
 	id, err := result.LastInsertId() // get new tx's ID
 	if err != nil {
@@ -131,7 +130,6 @@ func GetTransactionByID(ctx context.Context, db *sql.DB, userID int64, txID int6
 
 	row := db.QueryRowContext(ctx, query, txID, userID)
 	err := row.Scan(&tx.ID, &tx.Type, &timestamp, &tx.Amount, &tx.Note)
-
 	if err != nil {
 		return models.Transaction{}, err
 	}
