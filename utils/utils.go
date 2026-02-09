@@ -32,7 +32,7 @@ func ParseCommand(command string) models.Command {
 	cmdType, cmdBot, _ := strings.Cut(cmd, "@")
 
 	return models.Command{
-		Action: cmdType,
+		Action: models.TransactionType(cmdType),
 		Bot:    cmdBot,
 	}
 }

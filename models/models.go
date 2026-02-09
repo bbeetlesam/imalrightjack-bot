@@ -1,9 +1,16 @@
 // Package models contains data structures used across the program/application.
 package models
 
+type TransactionType string
+
+const (
+	TransactionTypeEarn  TransactionType = "earn"
+	TransactionTypeSpend TransactionType = "spend"
+)
+
 type Transaction struct {
 	ID     int64
-	Type   string
+	Type   TransactionType
 	Amount int64
 	Note   string
 	Time   string
@@ -16,6 +23,6 @@ type BotConfig struct {
 }
 
 type Command struct {
-	Action string
+	Action TransactionType
 	Bot    string
 }

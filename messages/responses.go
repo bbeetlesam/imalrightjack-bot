@@ -31,14 +31,14 @@ const (
 // will be later moved to somewhere proper, like configs
 const currencySign = "Rp\\."
 
-func RespTransactionSuccess(act string, id int64, amount int64, note string) string {
+func RespTransactionSuccess(act models.TransactionType, id int64, amount int64, note string) string {
 	noteText := "\\-"
 	action := "Spent"
 
 	if note != "" {
 		noteText = utils.EscapeMarkdownV2(note)
 	}
-	if act == "earn" {
+	if act == models.TransactionTypeEarn {
 		action = "Earned"
 	}
 
@@ -47,8 +47,8 @@ func RespTransactionSuccess(act string, id int64, amount int64, note string) str
 
 func RespTodayTransactions(transactions []models.Transaction, totalAmount int64) string {
 	message := ""
-	prefixEmoji := func(str string) string {
-		if str == "spend" {
+	prefixEmoji := func(str models.TransactionType) string {
+		if str == models.TransactionTypeSpend {
 			return "\\[`\\-`\\]" //➖
 		}
 		return "\\[`\\+`\\]" //➕
@@ -81,7 +81,7 @@ func RespTodayTransactions(transactions []models.Transaction, totalAmount int64)
 
 func RespDetailedTransaction(tx models.Transaction) string {
 	txType := "Earned"
-	if tx.Type == "spend" {
+	if tx.Type == models.TransactionTypeSpend {
 		txType = "Spent"
 	}
 

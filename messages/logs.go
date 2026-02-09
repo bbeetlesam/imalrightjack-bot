@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/bbeetlesam/imalrightjack-bot/models"
 )
 
 const (
@@ -19,7 +21,7 @@ func LogMessageReceived(username string, userID int64, text string, msgDate int)
 	return fmt.Sprintf("Message from %s (%d) [%s]: %s", username, userID, timestamp, text)
 }
 
-func LogTransactionSaved(act string, amount int64, userID int64) string {
+func LogTransactionSaved(act models.TransactionType, amount int64, userID int64) string {
 	return fmt.Sprintf("Transaction saved: %s Rp. %d by user %d", act, amount, userID)
 }
 

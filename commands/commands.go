@@ -98,7 +98,7 @@ func handleTodayReport(ctx context.Context, db *sql.DB, userID int64) string {
 // TODO: use this for global getter (today, this month, week, date, etc)
 func handleGetLog(ctx context.Context, update tgbotapi.Update, db *sql.DB, userID int64) string {
 	if ctx.Err() != nil {
-		utils.LogColor("warn", "idontkow")
+		utils.LogColor("warn", "Shutdown signal received, skipping getlog")
 		return messages.RespDefault
 	}
 

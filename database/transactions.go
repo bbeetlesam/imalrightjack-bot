@@ -103,9 +103,9 @@ func GetTodayTransactions(ctx context.Context, db *sql.DB, userID int64) ([]mode
 		}
 
 		switch transaction.Type {
-		case "spend":
+		case models.TransactionTypeSpend:
 			totalAmount -= transaction.Amount
-		case "earn":
+		case models.TransactionTypeEarn:
 			totalAmount += transaction.Amount
 		}
 
