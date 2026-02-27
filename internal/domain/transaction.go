@@ -15,7 +15,7 @@ type Transaction struct {
 	Type   TransactionType
 	Amount int64
 	Note   string
-	Time   int64 // in UTC
+	Time   string // TODO: change to UTC int64 (better than RFC3339 string)
 }
 
 func (t *Transaction) IsValid() bool {
